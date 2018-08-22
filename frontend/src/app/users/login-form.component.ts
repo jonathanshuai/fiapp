@@ -22,6 +22,9 @@ export class LoginFormComponent {
     password: ''
   };
 
+  serverError = false;
+  serverErrorMessage = '';
+  updateServerError(event: any) { this.serverError = false; }
   constructor(private usersApi: UsersApiService, private router: Router) { }
 
   authenticateUser() {
@@ -34,8 +37,11 @@ export class LoginFormComponent {
       .authenticateUser(this.user)
       .subscribe(
         () => this.router.navigate(['/']),
-        error => alert(error.message)
-      );
+        error => {
+          this.serverError = true; 
+          this.serverErrorMessage = error.error;
+          console.log(error)
+        });
   }
 
   loginForm = new FormGroup({

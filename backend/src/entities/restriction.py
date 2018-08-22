@@ -11,7 +11,9 @@ class Restriction(Entity, Base):
     vegetarian = Column(Boolean)
     peanut_free = Column(Boolean)
 
-    def __init__(self, userid, vegan, vegetarian, peanut_free, created_by):
+    def __init__(self, userid, created_by, 
+        vegan=False, vegetarian=False, peanut_free=False):
+        
         Entity.__init__(self, created_by)
         self.userid = userid
         self.vegan = vegan

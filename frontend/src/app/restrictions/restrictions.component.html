@@ -1,0 +1,25 @@
+<span></span>
+<div id="settings-wrapper">
+    <form id="settings-form" method=post>
+        <div id="settings-form-inner">
+            <p class="settings-text">Result filters:</p>
+            
+            <input class="settings-option" type="checkbox" 
+            [checked]="restriction.vegan" 
+            (change)="restriction.vegan = !restriction.vegan">
+            <label class="settings-label">Vegan</label><br>
+            
+            <input class="settings-option" type="checkbox" 
+            [checked]="restriction.vegetarian" 
+            (change)="restriction.vegetarian = !restriction.vegetarian">
+            <label class="settings-label">Vegetarian</label><br>
+
+            <input class="settings-option" type="checkbox" 
+            [checked]="restriction.peanut_free" 
+            (change)="restriction.peanut_free = !restriction.peanut_free">
+            <label class="settings-label">Peanut Free</label><br>
+        
+        </div>
+        <button class="save-btn" (click)="saveRestrictions()">Save Settings</button>
+    </form>
+</div>

@@ -2,7 +2,7 @@
 <div class="auth-wrapper">
   <form [formGroup]="loginForm" (ngSubmit)="authenticateUser()">
     
-    <input type="text" class="form-input" placeholder="username" formControlName="username">
+    <input type="text" class="form-input" placeholder="username" formControlName="username" (keyup)="updateServerError($event)">
     <input type="password" class="form-input" placeholder="password" formControlName="password">
 
     <div *ngIf="username.invalid && (username.dirty || username.touched)" class="error-flash">
@@ -17,6 +17,7 @@
       </div>
     </div>
 
+    <div class="error-flash" [hidden]="!serverError"> {{ serverErrorMessage }} </div>
     <button class="login-btn" type="submit" [disabled]="!loginForm.valid">Login</button>
   </form>
 

@@ -1,6 +1,6 @@
 <span></span>
 <div class="auth-wrapper">
-  <form [formGroup]="registerForm" (ngSubmit)="saveUser()">
+  <form [formGroup]="registerForm" (ngSubmit)="registerUser()">
     
     <input type="text" class="form-input" placeholder="username" formControlName="username" (keyup)="updateServerError($event)">
 

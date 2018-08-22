@@ -5,32 +5,41 @@ import {ReactiveFormsModule} from '@angular/forms';
 import {HttpClientModule} from '@angular/common/http';
 
 
-import {AppComponent} from './app.component';
 import {UsersApiService} from './users/users-api.service';
 import {RecipesApiService} from './recipes/recipes-api.service';
 import {RestrictionsApiService} from './restrictions/restrictions-api.service';
 
-import {RecipeFormComponent} from './recipes/recipe-form.component';
 import {RouterModule, Routes} from '@angular/router';
-import {RecipesComponent} from './recipes/recipes.component';
 
+import {AppComponent} from './app.component';
 import {RegisterFormComponent} from './users/register-form.component';
 import {LoginFormComponent} from './users/login-form.component';
+import {LogoutComponent} from './users/logout.component';
+import {RecommenderComponent} from './recipes/recommender.component';
+import {RecipesComponent} from './recipes/recipes.component';
+import {RestrictionsComponent} from './restrictions/restrictions.component';
+
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { TokenInterceptor } from './users/token.interceptor';
 
 const appRoutes: Routes = [
-  { path: 'new-recipe', component: RecipeFormComponent },
   { path: 'register', component: RegisterFormComponent },
   { path: 'login', component: LoginFormComponent },
-  { path: '', component: RecipesComponent },
+  { path: 'logout', component: LogoutComponent },
+  { path: '', component: RecommenderComponent},
+  { path: 'recipes', component: RecipesComponent },
+  { path: 'settings', component: RestrictionsComponent },
 ];
 
 @NgModule({
   declarations: [
     AppComponent,
-    RecipeFormComponent,
-    RecipesComponent,
     RegisterFormComponent,
-    LoginFormComponent
+    LoginFormComponent,
+    LogoutComponent,
+    RecommenderComponent,
+    RestrictionsComponent,
+    RecipesComponent
   ],
   imports: [
     BrowserModule,
@@ -41,7 +50,16 @@ const appRoutes: Routes = [
       appRoutes,
     ),
   ],
-  providers: [UsersApiService, RecipesApiService, RestrictionsApiService],
+  providers: [
+    UsersApiService, 
+    RecipesApiService, 
+    RestrictionsApiService,
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: TokenInterceptor,
+      multi: true
+    } 
+  ],
   bootstrap: [AppComponent],  
 })
 export class AppModule {

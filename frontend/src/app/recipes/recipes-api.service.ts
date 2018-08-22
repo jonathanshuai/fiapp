@@ -27,4 +27,14 @@ export class RecipesApiService {
       .post(`${API_URL}/recipes`, recipe);
   }
 
+  getSuggestions(formData, options): Observable<Recipe[]> {
+    return this.http
+      .post<Recipe[]>(`${API_URL}/recommender`, formData, options);
+  }
+
+  sendDummy(): Observable<any> {
+    return this.http
+      .post(`${API_URL}/dummy`, '');
+  }
+
 }

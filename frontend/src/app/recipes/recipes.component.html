@@ -1,0 +1,21 @@
+<div id="recipe-wrapper">
+    <div id="recipe-header">
+        Hi {{ name }}! Here are the recipes you've saved:
+    </div>
+    <div *ngFor="let recipe of recipesList" class="recipe">
+        <div [style.background]="recipe.imgsrc" class="recipe-image"></div> 
+
+        <div class="recipe-text-outer">
+            <div class="recipe-text-inner"><a [href]="recipe.url">{{ recipe.title }}</a></div> 
+        </div>
+
+    </div> <!-- recipe -->    
+</div>
+
+<div>
+  <button (click)="leakCredentials()">leakCredentials</button>
+  <button (click)="sendDummy()">sendDummy</button>
+  <button (click)="loggedIn()">loggedIn</button>
+
+  <a href="window.location='www.google.com'">www.google.com</a>
+</div>

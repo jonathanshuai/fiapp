@@ -28,7 +28,7 @@ export class RegisterFormComponent {
   updateServerError(event: any) { this.serverError = false; }
   constructor(private usersApi: UsersApiService, private router: Router) { }
 
-  saveUser() {
+  registerUser() {
     this.user = {
       username: this.registerForm.get('username').value,
       password: this.registerForm.get('password').value,
@@ -36,7 +36,7 @@ export class RegisterFormComponent {
     }
 
     this.usersApi
-      .saveUser(this.user)
+      .registerUser(this.user)
       .subscribe(
         () => this.router.navigate(['/login']),
         error => {

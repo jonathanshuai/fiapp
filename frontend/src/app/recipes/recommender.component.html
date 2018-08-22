@@ -1,0 +1,17 @@
+<span></span>
+<div id="recommender-wrapper">
+    <div id="upload-form-wrapper">
+   
+        Upload Image:
+     
+        <input id="upload-icon" type="image" 
+        src="https://image.flaticon.com/icons/svg/69/69380.svg" width="80px"
+        (click)="showImageBrowseDlg()"/>
+     
+        <input #uploadFile type="file" 
+        (change)="fileChange($event)" 
+        placeholder="Upload file" accept=".png,.jpg,.jpeg" style="display: none;">
+   
+
+    </div> <!-- upload-form-wrapper -->
+</div>

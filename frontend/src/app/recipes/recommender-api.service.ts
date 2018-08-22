@@ -3,10 +3,10 @@ import {HttpClient, HttpErrorResponse} from '@angular/common/http';
 import {Observable} from 'rxjs/Observable';
 import 'rxjs/add/operator/catch';
 import {API_URL} from '../env';
-import {Restriction} from './restriction.model';
+import {Recipe} from './recipe.model';
 
 @Injectable()
-export class RestrictionsApiService {
+export class RecommenderApiService {
 
   constructor(private http: HttpClient) {
   }
@@ -15,15 +15,9 @@ export class RestrictionsApiService {
     return Observable.throw(err.message || 'Error: Unable to complete request.');
   }
 
-  // GET list of public, future events
-  getRestrictions(): Observable<Restriction> {
+  sendImage(): Observable<any> {
     return this.http
-      .get<Restriction>(`${API_URL}/restrictions`)
-      .catch(RestrictionsApiService._handleError);
+      .post(`${API_URL}/recommender`, '');
   }
 
-  saveRestrictions(restriction: Restriction): Observable<any> {
-    return this.http
-      .post(`${API_URL}/update_restriction`, restriction);
-  }
 }
