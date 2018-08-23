@@ -4,6 +4,8 @@ import {FormsModule}   from '@angular/forms';
 import {ReactiveFormsModule} from '@angular/forms';
 import {HttpClientModule} from '@angular/common/http';
 
+import { MatProgressSpinnerModule } from '@angular/material';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 import {UsersApiService} from './users/users-api.service';
 import {RecipesApiService} from './recipes/recipes-api.service';
@@ -46,6 +48,8 @@ const appRoutes: Routes = [
     HttpClientModule,
     FormsModule,
     ReactiveFormsModule,
+    MatProgressSpinnerModule,
+    MatCheckboxModule,
     RouterModule.forRoot(
       appRoutes,
     ),

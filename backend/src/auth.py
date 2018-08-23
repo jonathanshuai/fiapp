@@ -44,10 +44,6 @@ def register():
 
 @bp.route('/authenticate', methods=['POST'])
 def login():
-    # User made POST to authenticate when already authenticated
-    if current_user.is_authenticated:
-        return 'Already authenticated', 401
-
     # Get JSON from request: it should have username and password
     request_json = request.get_json()
 

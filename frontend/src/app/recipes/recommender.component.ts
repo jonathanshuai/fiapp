@@ -1,7 +1,7 @@
 import {Component, Renderer, ElementRef, ViewChild, OnInit} from '@angular/core';
-import {RequestOptions, Request, RequestMethod} from '@angular/http';
 import {HttpClient} from '@angular/common/http';
 import {Router} from "@angular/router";
+import {DomSanitizer} from '@angular/platform-browser';
 
 import { NgModule }      from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
@@ -22,7 +22,16 @@ export class RecommenderComponent implements OnInit{
  constructor(private recipesApi: RecipesApiService, 
               private usersApi: UsersApiService, 
               private router: Router,
-              private renderer: Renderer) { }
+              private renderer: Renderer,
+              private sanitizer: DomSanitizer) { }
+
+  showLoading = false;
+  sentImage = false;
+  url = '';
+
+  ingredients = ''
+  recipesList = []
+
 
   ngOnInit(){
     if (!this.usersApi.loggedIn()){
@@ -35,37 +44,73 @@ export class RecommenderComponent implements OnInit{
   }
 
   fileChange(event) {
-      let fileList: FileList = event.target.files;
-      
-      if (fileList.length > 0) {
-          let file: File = fileList[0];
-          let formData: FormData = new FormData();
-          formData.append('uploadFile', file, file.name);
-          let headers = new Headers();
-          /** In Angular 5, including the header Content-Type can invalidate your request */
-          headers.append('Content-Type', 'multipart/form-data');
-          headers.append('Accept', 'application/json');
-          
-          let options = new RequestOptions({ headers: headers });
-          
-          console.log(formData);
-          console.log(options);
 
-          this.recipesApi
-            .getSuggestions(formData, options)
-            .subscribe(
-              result => console.log(result),
-              error => console.log('error')
-            );
-          
-          // this.http.post(`${this.apiEndPoint}`, formData, options)
-          //     .map(res => res.json())
-          //     .catch(error => Observable.throw(error))
-          //     .subscribe(
-          //         data => console.log('success'),
-          //         error => console.log(error)
-          //     )
+    let file = event.target.files[0];
+    console.log(file);
+
+    if (event.target.files && event.target.files[0]) {
+      var reader = new FileReader();
+      reader.onload = (event: ProgressEvent) => {
+        this.url = (<FileReader>event.target).result;
       }
+      reader.readAsDataURL(event.target.files[0]);
+    }
+
+    let formData: FormData = new FormData();
+    formData.append('image', file, file.name);
+
+    console.log(formData);
+    this.recipesApi
+      .getSuggestions(formData)
+      .subscribe(
+        result => {
+          this.ingredients = result['ingredients'];
+
+          this.recipesList = result['recipes'];
+          for (let recipe of this.recipesList){
+            recipe['imgsrcsafe'] = this.sanitizer.bypassSecurityTrustStyle(`url(${recipe.imgsrc})`);
+          }
+
+          this.showLoading = false;
+        },
+        error => {
+          console.log(error);
+          this.showLoading = false;
+          this.ingredients = "Unknown error occurred.";
+        }
+      );
+
+      this.showLoading = true;
+      this.sentImage = true;
+  }
+
+
+  toggleRecipe(recipe, event){
+    // Hacky
+    if (event.srcElement.innerHTML == 'Save Recipe'){
+      this.recipesApi
+      .saveRecipe(recipe)
+      .subscribe(
+        result => {
+          console.log(result);
+        },
+        error => console.log(error)
+      );
+      event.srcElement.innerHTML = 'Delete Recipe';
+    }
+    else{
+      this.recipesApi
+      .deleteRecipe(recipe)
+      .subscribe(
+        result => {
+          console.log(event.srcElement);
+          console.log(result);
+        },
+        error => console.log(error)
+      );
+      event.srcElement.innerHTML = 'Save Recipe';
+
+    }
   }
 
 

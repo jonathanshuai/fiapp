@@ -55,6 +55,70 @@ def get_recipes():
             session.close()
             return jsonify(recipes.data), 201
 
+@app.route('/save_recipe', methods=['POST'])
+def save_recipe():
+    # Check authentication and get userid
+    auth_header = request.headers.get('Authorization')
+    
+    auth_token = ''
+    if auth_header:
+        auth_token = auth_header.split(" ")[1]
+    
+    if auth_token:
+        userid, message = User.decode_auth_token(auth_token)
+        # On failure, return error message
+        if not userid:
+            return jsonify({'message': message}), 401
+        # On successful auth
+        else:
+            # Create recipe 
+            session = Session()
+            posted_recipe = RecipeSchema(only=('title', 'url', 'imgsrc'))\
+                .load(request.get_json())
+
+            print(posted_recipe.data)
+            print(request.get_json())
+            recipe = Recipe(**posted_recipe.data, userid=userid, created_by="HTTP post request")
+
+            # persist recipe
+            session.add(recipe)
+            session.commit()
+
+            # close session and return good
+            session.close()
+
+            return jsonify({'message': 'good'}), 201
+
+@app.route('/delete_recipe', methods=['POST'])
+def delete_recipe():
+    # Check authentication and get userid
+    auth_header = request.headers.get('Authorization')
+    
+    auth_token = ''
+    if auth_header:
+        auth_token = auth_header.split(" ")[1]
+    
+    if auth_token:
+        userid, message = User.decode_auth_token(auth_token)
+        # On failure, return error message
+        if not userid:
+            return jsonify({'message': message}), 401
+        # On successful auth
+        else:
+            # Create recipe 
+            session = Session()
+            request_json = request.get_json()
+            session.query(Recipe).filter(Recipe.userid == userid, 
+                    Recipe.title == request_json['title']).delete()
+
+            # persist recipe
+            session.commit()
+
+            # close session and return good
+            session.close()
+
+            return jsonify({'message': 'good'}), 201
+
 @app.route('/restrictions')
 def get_restrictions():
     # Check authentication and get userid

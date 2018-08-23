@@ -1,6 +1,7 @@
 import os
 
 from flask import Flask, Blueprint, jsonify, request, url_for, send_from_directory
+from werkzeug.utils import secure_filename
 
 import jwt
 
@@ -18,7 +19,12 @@ bp = Blueprint('recommender', __name__)
 UPLOAD_FOLDER = 'temp/'
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 
-@bp.route('/recommender', methods=('POST'))
+# Function to check if filetype is allowed
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@bp.route('/recommender', methods=['POST'])
 def recommender():
   # Check authentication and get userid
     auth_header = request.headers.get('Authorization')
@@ -36,49 +42,40 @@ def recommender():
         else:
             # fetching from the database restrictions
             session = Session()
-            restrictions_object = session.query(Restriction)\
+            restrictions = session.query(Restriction)\
                 .filter(Restriction.userid == userid).one()
 
-            # Turn it into some json object and return
-            schema = RestrictionSchema()
-            restrictions = schema.dump(restrictions_object)
+            # get the image file from request
+            file = request.files['image']
 
-            print(request)
-            print(request.get_json())
-            
-            # check if the post request has the file part
-            if 'file' not in request.files:
-                return jsonify({'message': 'No file part.'}), 500
-            file = request.files['file']
-                
-            # if user does not select file, browser also
-            # submit a empty part without filename
-            if file.filename == '':
-                return jsonify({'message': 'No selected file.'}), 500
-
+            # ensure correct filetype
             if not file or not allowed_file(file.filename):
                 return jsonify({'message': 'File type not allowed.'}), 500
             else:
                 # Upload file to our temp directory
                 filename = secure_filename(file.filename)
-                file_path = os.path.join(UPLOAD_FOLDER, filename) 
+                file_path = os.path.join(os.getcwd(), UPLOAD_FOLDER, filename) 
                 file.save(file_path)
                 imgsrc = url_for('recommender.uploaded_file', filename=filename)
 
                 # Return the restrictions w/ their names and values as tuples in a list
-                option_names = restrictions.keys()
-                option_values = list(restrictions)
-                options = list(zip(option_names, option_values))[2:] # Remove id and userid
+                options = [
+                    ('vegan', restrictions.vegan),
+                    ('vegetarian', restrictions.vegetarian),
+                    ('peanut_free', restrictions.peanut_free)
+                ] 
 
-                # # Blocking call to neural network and recipe api 
-                # ingredients, recipes = quickrecipe.find_recipes(
-                #     os.path.join(os.getcwd(), UPLOAD_FOLDER, filename), options)
+                ingredients = ''
+                # Blocking call to neural network and recipe api 
+                ingredients, recipes = quickrecipe.find_recipes(
+                    os.path.join(os.getcwd(), UPLOAD_FOLDER, filename), options)
 
-                # ingredients = pred_str = ', '.join(list(ingredients))
-                # if len(recipes) == 0:
-                #     recipes = [{'title': 'No recipes were found', 'url': '', 'image': ''}]
-                
-                return jsonify({'message': 'success'}), 500
+                ingredients = (', '.join(list(ingredients))).replace('_', ' ')
+
+                if len(recipes) == 0:
+                    ingredients = 'API overloaded. Please try again later!'
+
+                return jsonify({'ingredients': ingredients, 'recipes': recipes}), 201
 
     # db = get_db()
     return jsonify({'message': 'end!!'}), 500

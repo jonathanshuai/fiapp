@@ -8,6 +8,7 @@ import {UsersApiService} from '../users/users-api.service';
 
 import {DomSanitizer} from '@angular/platform-browser';
 
+
 @Component({
   selector: 'recipes',
   templateUrl: `./recipes.component.html`
@@ -36,8 +37,8 @@ export class RecipesComponent implements OnInit{
         result => {
           this.recipesList = result;
           for (let recipe of this.recipesList){
-            recipe['url'] = this.sanitizer.bypassSecurityTrustUrl(recipe.url);
-            recipe['imgsrc'] = this.sanitizer.bypassSecurityTrustStyle(`url(${recipe.imgsrc})`);
+            // recipe['url'] = recipe.url;
+            recipe['imgsrcsafe'] = this.sanitizer.bypassSecurityTrustStyle(`url(${recipe.imgsrc})`);
             console.log(this.recipesList)
           }
         },
@@ -45,24 +46,32 @@ export class RecipesComponent implements OnInit{
       );
   }
 
-  leakCredentials() {
-    console.log(localStorage.getItem("id_token"));
-  }
-
-  sendDummy(){
-    this.recipesApi
-      .sendDummy()
+  toggleRecipe(recipe, event){
+    // Hacky
+    if (event.srcElement.innerHTML == 'Save Recipe'){
+      this.recipesApi
+      .saveRecipe(recipe)
       .subscribe(
-        result => console.log('result'),
-        error => console.log('result') 
+        result => {
+          console.log(result);
+        },
+        error => console.log(error)
       );
+      event.srcElement.innerHTML = 'Delete Recipe';
+    }
+    else{
+      this.recipesApi
+      .deleteRecipe(recipe)
+      .subscribe(
+        result => {
+          console.log(event.srcElement);
+          console.log(result);
+        },
+        error => console.log(error)
+      );
+      event.srcElement.innerHTML = 'Save Recipe';
+
+    }
   }
 
-  loggedIn(){
-    console.log(this.usersApi.loggedIn())
-  }
-
-  externalLink(url){
-    this.router.navigateByUrl(url);
-  }
 }

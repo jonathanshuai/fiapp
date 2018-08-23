@@ -53,7 +53,10 @@ export class RestrictionsComponent{
     this.restrictionsApi
       .saveRestrictions(this.restriction)
       .subscribe(
-        result => console.log(result),
+        result => {
+          console.log(result);
+          this.router.navigate(['/']);
+        },
         error => console.log('error')
       );
   }

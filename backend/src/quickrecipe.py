@@ -10,14 +10,12 @@ import cv2
 import torch
 from torch.nn import Softmax
 
-from matplotlib import pyplot as plt
-
 from .model_definition import TransferModel
 
 import requests
 
-ITEM_NAMES_FILE = os.getcwd() + '/flaskr/models/food-items.txt'
-MODEL_FILE = os.getcwd() + '/flaskr/models/model2.pt'
+ITEM_NAMES_FILE = os.getcwd() + '/models/food-items.txt'
+MODEL_FILE = os.getcwd() + '/models/model.pt'
 IMAGE_SIZE = 224
 STRIDE = 112
 
@@ -35,6 +33,26 @@ n_classes = len(item_names)
 # Make dictionaries to turn labels into indicies
 label_dict_itos = dict(zip(range(0, n_classes), item_names))
 
+VEGETARIAN = {
+'bacon',
+'beef',
+'chicken_breast',
+'chicken_leg',
+'chicken_wing',
+'pork',
+'pork_ribs',
+'salmon',
+'tuna',
+'tilapia'
+}
+
+VEGAN = {
+'eggs',
+'cheddar_cheese',
+'mozzarella_cheese',
+'parmesan_cheese'
+}
+
 model = torch.load(MODEL_FILE)
 softmax = Softmax()
 
@@ -42,27 +60,32 @@ def find_recipes(file_path, options):
     """
     """
     # get_items - runs the nn on the image, returning a set of items
-    # call_api - 
 
     print("Making predictions...")
-    predictions = get_items(file_path)
-    print(predictions)
+    orig_predictions = get_items(file_path)
+    print(orig_predictions)
+    if options[1][1]: # If option for vegetarian
+        predictions = orig_predictions - VEGETARIAN
+
+    if options[0][1]: # If option for vegan
+        predictions = predictions - VEGAN - VEGETARIAN
+
     print("Finding recipes...")
     recipes = get_matching_recipes(predictions, options)
 
-    return predictions, recipes 
+    return orig_predictions, recipes 
 
 def get_matching_recipes(ingredients, options):
     # Keep finding recipes until there are at least N_RECIPES
     recipes = []
 
-    # We reduce the number of ingredients each API call 
-    for i in range(len(ingredients), 0, -2):
-        if i == 0:
+    # API call with subset of ingredients 
+    for i in range(len(ingredients), 0, min(-1, -(len(ingredients) // 2))):
+        if i < 1:
             i = 1
-        # Go through all ingredient combinations of size i
-        for ingredient_set in combinations(ingredients, i):
 
+        for ingredient_set in combinations(ingredients, i):
+            print(ingredient_set)
             # Call API and get json data 
             json_data = call_api(ingredient_set, options)
             
@@ -78,16 +101,18 @@ def get_matching_recipes(ingredients, options):
 
                 recipe = {'title': recipe_title, 
                             'url': recipe_url, 
-                            'imgsrc': recipe_image}
+                            'imgsrc': recipe_image,
+                            'uses': ', '.join(ingredient_set).replace('_', ' ') }
                 recipes.append(recipe)
 
                 if len(recipes) >= N_RECIPES:
                     return recipes
+        
 
 def call_api(ingredients, options):
     base_url = "https://api.edamam.com/search?app_id={}&app_key={}".format(APP_ID, APP_KEY)
 
-    query = 'q=' + ','.join(ingredients)
+    query = 'q=' + (','.join(ingredients)).replace('_', '%20')
     
     options = map(lambda x: x[0].replace('_', '-'), (filter(lambda x: x[1] == 1, options)))
     health =  '&'.join(['health=' + option for option in options])
@@ -101,8 +126,7 @@ def call_api(ingredients, options):
 
     # We get 401 when we made too many requests. What to do?
     while r.status_code == 401:
-        time.sleep(2)
-        r = requests.get(request_url)
+        return None
 
     json_data = r.json()
 
@@ -118,7 +142,7 @@ def get_items(file_path):
     image = cv2.cvtColor(cv2.imread(file_path), cv2.COLOR_BGR2RGB)
 
     preds_on_orig = sample_and_predict(image)
-    preds_on_scaled = sample_and_predict(cv2.resize(image, (0,0), fx=1.5, fy=1.5))
+    preds_on_scaled = sample_and_predict(cv2.resize(image, (0,0), fx=1.2, fy=1.2))
 
     return set(preds_on_orig + preds_on_scaled)
 

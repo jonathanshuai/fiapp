@@ -24,12 +24,17 @@ export class RecipesApiService {
 
   saveRecipe(recipe: Recipe): Observable<any> {
     return this.http
-      .post(`${API_URL}/recipes`, recipe);
+      .post(`${API_URL}/save_recipe`, recipe);
   }
 
-  getSuggestions(formData, options): Observable<Recipe[]> {
+  deleteRecipe(recipe: Recipe): Observable<any> {
     return this.http
-      .post<Recipe[]>(`${API_URL}/recommender`, formData, options);
+      .post(`${API_URL}/delete_recipe`, recipe);
+  }
+
+  getSuggestions(formData): Observable<Recipe[]> {
+    return this.http
+      .post<Recipe[]>(`${API_URL}/recommender`, formData);
   }
 
   sendDummy(): Observable<any> {

@@ -4,21 +4,21 @@
         <div id="settings-form-inner">
             <p class="settings-text">Result filters:</p>
             
-            <input class="settings-option" type="checkbox" 
+            <mat-checkbox class="green" 
             [checked]="restriction.vegan" 
-            (change)="restriction.vegan = !restriction.vegan">
+            (change)="restriction.vegan = !restriction.vegan"></mat-checkbox>
             <label class="settings-label">Vegan</label><br>
             
-            <input class="settings-option" type="checkbox" 
+            <mat-checkbox class="green" 
             [checked]="restriction.vegetarian" 
-            (change)="restriction.vegetarian = !restriction.vegetarian">
+            (change)="restriction.vegetarian = !restriction.vegetarian"></mat-checkbox>
             <label class="settings-label">Vegetarian</label><br>
 
-            <input class="settings-option" type="checkbox" 
+            <mat-checkbox class="green" 
             [checked]="restriction.peanut_free" 
-            (change)="restriction.peanut_free = !restriction.peanut_free">
+            (change)="restriction.peanut_free = !restriction.peanut_free"></mat-checkbox>
             <label class="settings-label">Peanut Free</label><br>
-        
+
         </div>
         <button class="save-btn" (click)="saveRestrictions()">Save Settings</button>
     </form>
